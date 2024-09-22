@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AERESC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            animation: marquee 30s linear infinite;
+        }
+        /* Ensure dropdown has higher z-index than news ticker */
+nav ul li ul, .mobile-dropdown {
+    z-index: 1000;  /* High enough to ensure it's above other elements */
+}
+
+/* News ticker lower z-index */
+.news-ticker {
+    z-index: 500;  /* Lower than the dropdown */
+}
+/* Ensure dropdown menus are positioned and have a high z-index */
+.nav-item {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute; /* Positioned relative to parent */
+    top: 100%; /* Dropdown below the button */
+    left: 0;
+    background-color: white;
+    z-index: 1000; /* High enough to prevent overlap */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+/* Display dropdown on hover */
+.nav-item:hover .dropdown-menu {
+    display: block;
+}
+
+/* Adjust news ticker z-index */
+.news-ticker {
+    z-index: 500; /* Lower z-index than dropdown */
+    position: relative;
+}
+
+    </style>
+</head>
+<body>
+    <div class="sticky top-0 left-0 right-0 z-50">
+        <nav class="bg-white shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="/" class="flex items-center">
+                            <img src="Logo.jpg" alt="AERE School Logo" class="w-10 h-10 rounded-full">
+                        </a>
+                    </div>
+                    <div class="hidden md:flex md:items-center md:space-x-4" id="desktop-menu">
+                        <!-- Desktop menu items will be populated by JavaScript -->
+                    </div>
+                    <div class="hidden md:flex md:items-center">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-2 flex items-center">
+                            <i data-lucide="headset" class="w-4 h-4 mr-2"></i>
+                            Contact
+                        </button>
+                    </div>
+                    <div class="flex items-center md:hidden">
+                        <button id="mobile-menu-button" class="text-gray-500 hover:text-gray-700">
+                            <i data-lucide="menu" class="h-6 w-6"></i>
+                            <span class="sr-only">Open main menu</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <!-- Mobile menu items will be populated by JavaScript -->
+            </div>
+        </nav>
+        <div class="bg-blue-100 py-2 overflow-hidden">
+            <div class="flex whitespace-nowrap animate-marquee" id="news-ticker">
+                <!-- News ticker items will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="relative">
+        <div class="relative w-full h-full">
+            <video autoplay muted loop class="w-full h-full object-cover">
+                <source src="/header.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="absolute inset-0 bg-white opacity-40"></div>
+        </div>            
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white p-4">
+            <div class="bg-white rounded-full p-2 mb-4">
+                <img src="Logo.jpg" alt="School Logo" class="w-24 h-24 rounded-full">
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold text-center mb-2">
+                Atomic Energy Research Establishment School and College
+            </h1>
+            <div class="text-sm md:text-base text-center">
+                <p>College code: 1930 || School Code: 1553 || EIIN: 108406</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold mb-10 text-center">About Us</h2>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="lg:w-2/3">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="p-6">
+                        <p class="mb-4">
+                            Atomic Energy Research Establishment School and College (AERESC) began its journey in 1983, initially as a high school for the children of employees residing within the Atomic Energy Research Establishment (AERE) campus and for students from nearby areas. It was recognized as a school serving the community, and in 2008, the institution was expanded to include college-level education, adopting its current name.
+                        </p>
+                        <p class="mb-4">
+                            AERESC is a part of the Bangladesh Atomic Energy Commission (BAEC) and operates under the oversight of a governing body chaired by the Director General of AERE. The institution is located within the AERE campus and benefits from its well-structured environment and dedicated support.
+                        </p>
+                        <p class="mb-4">
+                            At present, AERESC serves more than 1,600 students, with over 37 teachers and 13 administrative staff working to provide a balanced, high-quality education. The institution is committed to cultivating morally upright and capable citizens who can meet the challenges of the modern world. AERESC's academic discipline, well-coordinated educational system, and carefully planned extracurricular activities are well-known throughout the area.
+                        </p>
+                        <p>
+                            With its reputation for excellent academic performance and active participation in co-curricular and extracurricular activities, AERESC has earned a prominent position among educational institutions in the region. The commitment of the institution's management, faculty, and staff ensures that AERESC continues to strive toward greater achievements in education, preparing students for the future with guidance and support from all stakeholders.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:w-1/3">
+                <div class="bg-white shadow rounded-lg h-full">
+                    <div class="p-6 flex flex-col h-full">
+                        <div class="relative flex-grow mb-4">
+                            <img id="carousel-image" src="/placeholder.svg?height=400&width=300" alt="School image" class="w-full h-full object-cover rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold mb-10 text-center">Principal's Message</h2>
+        <div class="flex flex-col lg:flex-row gap-8 items-center">
+            <div class="lg:w-2/3">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="p-6">
+                        <p class="mb-4">
+                            Welcome to AERE School & College. As the principal, I am proud to lead an institution that has been at the forefront of quality education for decades. Our commitment to academic excellence, character development, and innovation sets us apart.
+                        </p>
+                        <p class="mb-4">
+                            At aeresc, we believe in nurturing not just brilliant minds, but also compassionate hearts. Our dedicated faculty and staff work tirelessly to create an environment where every student can thrive and reach their full potential.
+                        </p>
+                        <p>
+                            We invite you to explore our website and learn more about the unique opportunities we offer. Together, let's embark on a journey of learning, growth, and discovery.
+                        </p>
+                        <p class="mt-4 font-semibold">Sudhangshu Shekhor Roy</p>
+                        <p class="text-sm text-gray-600">Principal (Acting), Atomic Energy Research Establishment School & College</p>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:w-1/3">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="p-6">
+                        <img src="/Principle.png" alt="Principal" class="w-full h-auto rounded-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold mb-10 text-center">Notice Board</h2>
+        <div id="notice-board" class="space-y-4">
+            <!-- Notices will be dynamically inserted here -->
+        </div>
+        <div class="text-center mt-4">
+            <button id="load-more-notices" class="border border-gray-300 rounded-md px-4 py-2 flex items-center mx-auto">
+                See More Notices
+                <i data-lucide="chevron-right" class="ml-2 h-4 w-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold mb-10 text-center">Recent Activities</h2>
+        <div id="activities-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Activities will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <footer class="bg-gray-100 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold mb-4">Contact Us</h3>
+                    <div class="space-y-2">
+                        <p class="flex items-center">
+                            <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Atomic Energy Research Establishment School And College, Sreepur - Kashimpur Road, Baipayl 1349
+                        </p>
+                        <p class="flex items-center">
+                            <i data-lucide="mail" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            <a href="mailto:aeresc108406@gmail.com" class="hover:text-blue-600">aeresc108406@gmail.com</a>
+                        </p>
+                        <p class="flex items-center">
+                            <i data-lucide="phone" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            <a href="tel:+8801686237297" class="hover:text-blue-600">+8801686237297</a>
+                        </p>
+                        <p class="flex items-center">
+                            <i data-lucide="facebook" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            <a href="https://www.facebook.com/groups/700860523810925/?ref=share&mibextid=NSMWBT" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600">Facebook Group</a>
+                        </p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 h-64 md:h-80">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3648.4262800715436!2d90.25083661498236!3d23.878456184528954!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755e9cdc8baf5bf%3A0x4d78b2b9f38ab12c!2sAtomic%20Energy%20Research%20Establishment!5e0!3m2!1sen!2sbd!4v1625641721544!5m2!1sen!2sbd"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-600 text-sm">
+                © 2024 Atomic Energy Research Establishment School & College. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDstnQCEailUzFZ48AwKgfHCHqFjwiel-A",
+            authDomain: "aeresc-1983.firebaseapp.com",
+            databaseURL: "https://aeresc-1983-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aeresc-1983",
+            storageBucket: "aeresc-1983.appspot.com",
+            messagingSenderId: "261434891022",
+            appId: "1:261434891022:web:e58ec51d1d0a1a0ce1955f"
+            };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Navigation menu data
+const navItems = [
+    { name: "Home", href: "/" },
+    { name: "About Us", href: "/about", dropdown: ["Mission & Vision", "History", "Campus"] },
+    { name: "Academic", href: "/academic", dropdown: [
+        { name: "Rules and Regulation", href: "/rules" },
+        { name: "Student Login", href: "https://www.eximusedu.com/login" },  // Updated URL
+        { name: "Others", href: "/others" }
+    ]},
+    { name: "Administration", href: "/administration" },
+    { name: "Admission", href: "/admission", dropdown: ["Requirements", "Apply"] },
+    { name: "Teachers", href: "/teachers" },
+    { name: "Co-Curricular", href: "/co-curricular" },
+    { name: "Gallery", href: "/gallery" },
+];
+
+// Populate desktop menu
+const desktopMenu = document.getElementById('desktop-menu');
+navItems.forEach(item => {
+    const menuItem = document.createElement('div');
+    menuItem.className = 'relative nav-item'; // Add nav-item class for dropdown handling
+    if (item.dropdown) {
+        menuItem.innerHTML = `
+            <button class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                ${item.name}
+                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+            </button>
+            <div class="dropdown-menu absolute hidden bg-white shadow-md mt-2 py-2 rounded-md">
+                ${item.dropdown.map(subItem => {
+                    return typeof subItem === 'string'
+                        ? `<a href="${item.href}/${subItem.toLowerCase().replace(/ /g, "-")}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                ${subItem}
+                           </a>`
+                        : `<a href="${subItem.href}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                ${subItem.name}
+                           </a>`;
+                }).join('')}
+            </div>
+        `;
+        // Toggle dropdown visibility on hover
+        menuItem.addEventListener('mouseenter', () => {
+            const dropdown = menuItem.querySelector('.dropdown-menu');
+            dropdown.classList.remove('hidden');
+        });
+        menuItem.addEventListener('mouseleave', () => {
+            const dropdown = menuItem.querySelector('.dropdown-menu');
+            dropdown.classList.add('hidden');
+        });
+    } else {
+        menuItem.innerHTML = `
+            <a href="${item.href}" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                ${item.name}
+            </a>
+        `;
+    }
+    desktopMenu.appendChild(menuItem);
+});
+// Populate mobile menu
+const mobileMenu = document.getElementById('mobile-menu');
+navItems.forEach(item => {
+    const menuItem = document.createElement('div');
+    if (item.dropdown) {
+        menuItem.innerHTML = `
+            <button class="block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 w-full text-left">
+                <div class="flex items-center justify-between">
+                    <span>${item.name}</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+            </button>
+            <div class="mobile-dropdown hidden pl-6">
+                ${item.dropdown.map(subItem => {
+                    return typeof subItem === 'string'
+                        ? `<a href="${item.href}/${subItem.toLowerCase().replace(/ /g, "-")}" class="block px-4 py-2 text-sm text-gray-700">
+                                ${subItem}
+                           </a>`
+                        : `<a href="${subItem.href}" class="block px-4 py-2 text-sm text-gray-700">
+                                ${subItem.name}
+                           </a>`;
+                }).join('')}
+            </div>
+        `;
+        menuItem.querySelector('button').addEventListener('click', () => {
+            const dropdown = menuItem.querySelector('.mobile-dropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');  // Add active class to control visibility in CSS
+        });
+    } else {
+        menuItem.innerHTML = `
+            <a href="${item.href}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+                ${item.name}
+            </a>
+        `;
+    }
+    mobileMenu.appendChild(menuItem);
+});
+
+// Mobile menu toggle
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+mobileMenuButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+});
+
+        // Dynamic News Ticker
+        function loadNewsTicker() {
+            const newsTicker = document.getElementById('news-ticker');
+            newsTicker.innerHTML = ''; // Clear existing content
+
+            database.ref('news_ticker').orderByChild('timestamp').limitToLast(5).once('value', (snapshot) => {
+                const newsItems = [];
+                snapshot.forEach((childSnapshot) => {
+                    newsItems.unshift(childSnapshot.val().content);
+                });
+
+                newsItems.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'mx-4 text-blue-800';
+                    span.textContent = item;
+                    newsTicker.appendChild(span);
+                });
+            });
+        }
+
+        // Load news ticker when the page loads
+        loadNewsTicker();
+
+        // Image carousel
+        const images = [
+            "/1.jpg",
+            "/2.jpg",
+            "/3.jpg",
+            "/4.jpg",
+            "/5.jpg",
+            "/6.jpg",
+        ];
+        let currentImage = 0;
+        const carouselImage = document.getElementById('carousel-image');
+
+        function updateImage() {
+            carouselImage.src = images[currentImage];
+            currentImage = (currentImage + 1) % images.length;
+        }
+
+        // Start the carousel
+        updateImage();
+        setInterval(updateImage, 3000); // Change image every 3 seconds
+
+            // Activities and Events
+    function createActivityCard(activity) {
+        const card = document.createElement('div');
+        card.className = 'bg-white shadow rounded-lg';
+        card.innerHTML = `
+            <div class="p-4">
+                ${activity.mediaType === 'video'
+            ? `<video src="${activity.mediaUrl}" class="w-full h-auto rounded-lg mb-4" controls></video>`
+            : `<img src="${activity.mediaUrl}" alt="${activity.caption}" class="w-full h-auto rounded-lg mb-4">`
+        }
+                <p class="text-sm">${activity.caption}</p>
+            </div>
+        `;
+        return card;
+    }
+
+    function loadActivities() {
+        const activitiesGrid = document.getElementById('activities-grid');
+        activitiesGrid.innerHTML = ''; // Clear existing content
+
+        // Load latest 3 activities (combination of gallery and co-curricular)
+        const galleryPromise = database.ref('gallery').orderByChild('timestamp').limitToLast(3).once('value');
+        const coCurricularPromise = database.ref('co-curricular').orderByChild('timestamp').limitToLast(3).once('value');
+
+        Promise.all([galleryPromise, coCurricularPromise]).then(([gallerySnapshot, coCurricularSnapshot]) => {
+            const allActivities = [];
+
+            gallerySnapshot.forEach((childSnapshot) => {
+                allActivities.push(childSnapshot.val());
+            });
+
+            coCurricularSnapshot.forEach((childSnapshot) => {
+                allActivities.push(childSnapshot.val());
+            });
+
+            // Sort all activities by timestamp (descending)
+            allActivities.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Display only the top 3 activities
+            const activitiesToDisplay = allActivities.slice(0, 3);
+            activitiesToDisplay.forEach(activity => {
+                activitiesGrid.appendChild(createActivityCard(activity));
+            });
+        });
+    }
+
+    // Load activities when the page loads
+    loadActivities();
+
+    // Initialize Lucide icons
+        lucide.createIcons();
+        // Function to create a notice element
+        function createNoticeElement(notice) {
+            const noticeElement = document.createElement('div');
+            noticeElement.classList.add('bg-white', 'shadow', 'rounded-lg', 'p-4');
+            noticeElement.innerHTML = `
+                <h3 class="text-lg font-semibold mb-2">${notice.title}</h3>
+                <p class="text-gray-600 mb-2">${notice.content}</p>
+                <p class="text-sm text-gray-500">
+                    <i data-lucide="calendar" class="w-4 h-4 inline-block mr-1"></i>
+                    ${new Date(notice.timestamp).toLocaleDateString()}
+                </p>
+            `;
+            return noticeElement;
+        }
+
+        // Function to load notices
+        function loadNotices(startAt = null, limit = 5) {
+            let query = database.ref('notices').orderByChild('timestamp').limitToLast(limit);
+            if (startAt) {
+                query = query.startAfter(startAt);
+            }
+
+            query.once('value').then((snapshot) => {
+                const noticeBoard = document.getElementById('notice-board');
+                const notices = [];
+
+                snapshot.forEach((childSnapshot) => {
+                    notices.unshift(childSnapshot.val());
+                });
+
+                if (notices.length > 0) {
+                    notices.forEach((notice) => {
+                        const noticeElement = createNoticeElement(notice);
+                        noticeBoard.appendChild(noticeElement);
+                    });
+
+                    // Update "Load More" button
+                    const loadMoreButton = document.getElementById('load-more-notices');
+                    if (notices.length < limit) {
+                        loadMoreButton.disabled = true;
+                        loadMoreButton.textContent = 'No More Notices';
+                    } else {
+                        loadMoreButton.disabled = false;
+                        loadMoreButton.textContent = 'See More Notices';
+                        loadMoreButton.onclick = () => {
+                            loadNotices(notices[notices.length - 1].timestamp);
+                        };
+                    }
+                } else {
+                    // No notices found
+                    noticeBoard.innerHTML = '<p class="text-center text-gray-500">No notices found.</p>';
+                }
+            });
+        }
+
+        // Load initial notices when the page loads
+        loadNotices();
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

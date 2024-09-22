@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - AERE School & College</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold">AERE School & College Gallery</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto mt-8 px-4">
+        <div id="gallery-posts" class="space-y-8">
+            <!-- Gallery posts will be dynamically inserted here -->
+        </div>
+        <div class="text-center mt-8">
+            <button id="load-more" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Load More
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let lastLoadedTimestamp = Date.now();
+        const postsPerLoad = 5;
+
+        function createPostElement(post) {
+            const postElement = document.createElement('div');
+            postElement.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+
+            let mediaContent = '';
+            if (post.mediaType === 'image') {
+                mediaContent = `<img src="${post.mediaUrl}" alt="${post.caption}" class="w-full h-auto">`;
+            } else if (post.mediaType === 'video') {
+                mediaContent = `
+                    <video controls class="w-full h-auto">
+                        <source src="${post.mediaUrl}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            }
+
+            postElement.innerHTML = `
+                <div class="p-4">
+                    <p class="text-gray-600 text-sm mb-2">${new Date(post.timestamp).toLocaleString()}</p>
+                    ${mediaContent}
+                    <p class="mt-4">${post.caption}</p>
+                </div>
+            `;
+
+            return postElement;
+        }
+
+        function loadPosts() {
+            database.ref('gallery')
+                .orderByChild('timestamp')
+                .endAt(lastLoadedTimestamp)
+                .limitToLast(postsPerLoad + 1)
+                .once('value')
+                .then((snapshot) => {
+                    const posts = [];
+                    snapshot.forEach((childSnapshot) => {
+                        posts.unshift(childSnapshot.val());
+                    });
+
+                    if (posts.length > postsPerLoad) {
+                        posts.shift(); // Remove the extra post we fetched
+                        lastLoadedTimestamp = posts[0].timestamp - 1;
+                    } else {
+                        document.getElementById('load-more').style.display = 'none';
+                    }
+
+                    const galleryContainer = document.getElementById('gallery-posts');
+                    posts.forEach((post) => {
+                        galleryContainer.appendChild(createPostElement(post));
+                    });
+                });
+        }
+
+        document.getElementById('load-more').addEventListener('click', loadPosts);
+
+        // Initial load
+        loadPosts();
+    </script>
+</body>
+</html>
